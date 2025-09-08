@@ -1,0 +1,178 @@
+# Image Deblurrer Configuration File
+# This file contains configuration settings for the image deblurring application
+
+# Model configuration
+model:
+  # Model type: 'pytorch' or 'tensorflow'
+  type: pytorch
+  
+  # Path to the trained model file (set to null if no model available)
+  path: null  # e.g., "models/deblur_unet.pth"
+  
+  # Model architecture: 'unet', 'srcnn', 'esrgan', etc.
+  architecture: unet
+  
+  # Input image size for the model [width, height]
+  input_size: [256, 256]
+  
+  # Number of input/output channels (3 for RGB, 1 for grayscale)
+  channels: 3
+  
+  # Device to run model on: 'auto', 'cpu', 'cuda'
+  device: auto
+
+# Image processing configuration
+processing:
+  # Whether to resize input images to target size
+  resize_input: false
+  
+  # Target size for resizing [width, height]
+  target_size: [512, 512]
+  
+  # Whether to enhance contrast after deblurring
+  enhance_contrast: true
+  
+  # Contrast enhancement parameters
+  contrast_alpha: 1.2  # Contrast multiplier (1.0-3.0)
+  contrast_beta: 10    # Brightness adjustment (0-100)
+  
+  # Whether to apply noise reduction
+  denoise: false
+  
+  # Noise reduction strength (0.1-1.0)
+  denoise_strength: 0.3
+
+# OpenCV method specific settings
+opencv:
+  # Sharpening kernel type: 'standard', 'strong', 'custom'
+  kernel_type: standard
+  
+  # Custom kernel (used if kernel_type is 'custom')
+  custom_kernel: [
+    [-1, -1, -1],
+    [-1,  9, -1],
+    [-1, -1, -1]
+  ]
+  
+  # Apply additional filtering
+  apply_bilateral_filter: true
+  bilateral_d: 9
+  bilateral_sigma_color: 75
+  bilateral_sigma_space: 75
+
+# Wiener filter settings
+wiener:
+  # Noise variance estimation method: 'auto', 'manual'
+  noise_estimation: auto
+  
+  # Manual noise variance (used if noise_estimation is 'manual')
+  noise_variance: 0.01
+  
+  # Blur kernel size estimation
+  kernel_size_estimation: auto
+  
+  # Manual blur kernel size
+  manual_kernel_size: 5
+
+# Deep learning specific settings
+deep_learning:
+  # Batch size for processing (adjust based on available memory)
+  batch_size: 1
+  
+  # Whether to use mixed precision (reduces memory usage)
+  mixed_precision: false
+  
+  # Model confidence threshold (0.0-1.0)
+  confidence_threshold: 0.5
+  
+  # Post-processing options
+  apply_post_processing: true
+  post_process_method: 'enhance'  # 'enhance', 'smooth', 'sharpen'
+
+# Output settings
+output:
+  # Output image format: 'auto' (same as input), 'jpg', 'png', etc.
+  format: auto
+  
+  # Output quality for JPEG (1-100)
+  jpeg_quality: 95
+  
+  # PNG compression level (0-9)
+  png_compression: 6
+  
+  # Whether to preserve metadata
+  preserve_metadata: true
+  
+  # Output filename suffix
+  suffix: "_deblurred"
+
+# Logging configuration
+logging:
+  # Log level: 'DEBUG', 'INFO', 'WARNING', 'ERROR'
+  level: INFO
+  
+  # Whether to log to file
+  log_to_file: false
+  
+  # Log file path (used if log_to_file is true)
+  log_file: "logs/deblur.log"
+  
+  # Log format
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Performance settings
+performance:
+  # Number of CPU threads to use (0 for auto)
+  num_threads: 0
+  
+  # Whether to use GPU acceleration if available
+  use_gpu: true
+  
+  # Memory limit in GB (0 for no limit)
+  memory_limit: 0
+  
+  # Whether to enable performance profiling
+  enable_profiling: false
+
+# Experimental features (use with caution)
+experimental:
+  # Enable experimental algorithms
+  enable_experimental: false
+  
+  # Multi-scale processing
+  multi_scale: false
+  
+  # Ensemble prediction (uses multiple models)
+  ensemble_prediction: false
+  
+  # Progressive enhancement
+  progressive_enhancement: false
+
+# Validation settings
+validation:
+  # Whether to validate input images
+  validate_input: true
+  
+  # Maximum allowed image size in MB
+  max_image_size_mb: 50
+  
+  # Minimum image dimensions [width, height]
+  min_dimensions: [32, 32]
+  
+  # Maximum image dimensions [width, height] (0 for no limit)
+  max_dimensions: [4096, 4096]
+
+# Batch processing settings
+batch:
+  # Default batch size for processing multiple images
+  default_batch_size: 10
+  
+  # Whether to process images in parallel
+  parallel_processing: true
+  
+  # Maximum number of worker processes
+  max_workers: 4
+  
+  # Progress bar settings
+  show_progress: true
+  progress_style: "bar"  # 'bar', 'percentage', 'none'
