@@ -11,12 +11,14 @@ __author__ = "Image Deblurrer Team"
 from .deblur import ImageDeblurrer
 from .image_processor import ImageProcessor
 from .model_loader import ModelLoader
+from .blur_detector import BlurDetector
 from .utils import setup_logging, validate_image_path
 
 __all__ = [
     "ImageDeblurrer",
     "ImageProcessor", 
     "ModelLoader",
+    "BlurDetector",
     "setup_logging",
     "validate_image_path"
 ]

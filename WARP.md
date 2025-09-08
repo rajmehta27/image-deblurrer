@@ -21,9 +21,13 @@ python src/deblur.py input_image.jpg output_image.jpg
 
 # Use specific deblurring method
 python src/deblur.py input_image.jpg output_image.jpg --method deep_learning
+python src/deblur.py input_image.jpg output_image.jpg --method wiener
 
 # Use custom configuration and debug logging
 python src/deblur.py input_image.jpg output_image.jpg --config config.yaml --log-level DEBUG
+
+# Run comprehensive demo with blur analysis
+python demo.py
 ```
 
 ### Development Commands
@@ -72,6 +76,13 @@ This is a modular image deblurring application with a plugin-like architecture s
 - Image quality metrics calculation (PSNR, SSIM, MSE)
 - Performance measurement tools and system info reporting
 
+**BlurDetector (`src/blur_detector.py`)**
+- Comprehensive blur analysis (type, level, extent)
+- Automatic blur type detection (motion, gaussian, out-of-focus)
+- Blur kernel parameter estimation
+- Frequency domain analysis
+- Method recommendation based on blur characteristics
+
 ### Configuration System
 
 The application uses a comprehensive YAML-based configuration system (`config.yaml`) with sections for:
@@ -89,9 +100,12 @@ The application uses a comprehensive YAML-based configuration system (`config.ya
 
 ### Current Implementation Status
 
-- OpenCV deblurring: ✅ Fully implemented
-- Deep learning infrastructure: ✅ Framework complete, needs trained models
-- Wiener filtering: ⚠️ Placeholder implementation
+- OpenCV deblurring: ✅ Enhanced with adaptive sharpening, CLAHE, unsharp masking
+- Wiener filtering: ✅ Fully implemented with PSF estimation
+- Richardson-Lucy deconvolution: ✅ Implemented with configurable iterations
+- Deep learning infrastructure: ✅ Complete with PyTorch/TensorFlow support, hybrid fallback
+- Blur detection & analysis: ✅ Comprehensive blur type detection and parameter estimation
+- Automatic method selection: ✅ Based on blur analysis
 - Model training pipeline: ❌ Not yet implemented
 
 ### Key Design Patterns
