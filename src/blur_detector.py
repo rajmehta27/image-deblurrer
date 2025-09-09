@@ -132,19 +132,24 @@ class BlurDetector:
         Returns:
             Dictionary with blur extent measurements
         """
-        # Estimate blur kernel size using autocorrelation
-        autocorr = signal.correlate2d(image, image, mode='same')
-        autocorr_center = autocorr[image.shape[0]//2, image.shape[1]//2]
-        autocorr_normalized = autocorr / autocorr_center
+        # Faster kernel size estimation using gradient analysis
+        # Calculate gradients
+        grad_x = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=3)
+        grad_y = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3)
+        gradient_magnitude = np.sqrt(grad_x**2 + grad_y**2)
         
-        # Find where autocorrelation drops to 0.5
-        threshold_map = autocorr_normalized > 0.5
-        labeled = measure.label(threshold_map)
-        center_label = labeled[image.shape[0]//2, image.shape[1]//2]
-        center_region = labeled == center_label
+        # Estimate kernel size based on gradient spread
+        mean_gradient = np.mean(gradient_magnitude)
         
-        # Estimate kernel size from region
-        kernel_size_estimate = np.sqrt(np.sum(center_region))
+        # Empirical formula for kernel size estimation
+        if mean_gradient < 5:
+            kernel_size_estimate = 25  # Heavy blur
+        elif mean_gradient < 10:
+            kernel_size_estimate = 15  # Moderate blur
+        elif mean_gradient < 20:
+            kernel_size_estimate = 9   # Light blur
+        else:
+            kernel_size_estimate = 5   # Minimal blur
         
         # Estimate motion blur angle if applicable
         blur_type = self.detect_blur_type(image)

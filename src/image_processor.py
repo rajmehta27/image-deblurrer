@@ -68,7 +68,9 @@ class ImageProcessor:
         """
         try:
             # Create output directory if it doesn't exist
-            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            output_dir = os.path.dirname(output_path)
+            if output_dir:  # Only create directory if there is one
+                os.makedirs(output_dir, exist_ok=True)
             
             # Ensure image is in the correct format
             if image.dtype != np.uint8:

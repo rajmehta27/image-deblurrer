@@ -195,16 +195,14 @@ class ImageDeblurrer:
             
             # Process each channel separately for color images
             if len(image_float.shape) == 3 and image_float.shape[2] == 3:
-                # Convert to LAB color space for better results
-                lab = color.rgb2lab(image_float)
+                # Process each RGB channel separately
+                psf = self._estimate_blur_kernel(color.rgb2gray(image_float))
+                deblurred = np.zeros_like(image_float)
                 
-                # Apply Wiener filter to L channel (luminance)
-                psf = self._estimate_blur_kernel(lab[:, :, 0])
-                deblurred_l = restoration.wiener(lab[:, :, 0], psf, balance=0.1)
-                
-                # Reconstruct the image
-                lab[:, :, 0] = deblurred_l
-                deblurred = color.lab2rgb(lab)
+                for i in range(3):
+                    deblurred[:, :, i] = restoration.wiener(
+                        image_float[:, :, i], psf, balance=0.1, clip=True
+                    )
             else:
                 # Grayscale image
                 psf = self._estimate_blur_kernel(image_float)
