@@ -21,6 +21,7 @@ from PIL import Image
 from image_processor import ImageProcessor
 from model_loader import ModelLoader
 from utils import setup_logging, validate_image_path
+from advanced_deblur import AdvancedDeblurrer, PerformanceOptimizer
 
 
 class ImageDeblurrer:
@@ -36,8 +37,10 @@ class ImageDeblurrer:
         self.logger = logging.getLogger(__name__)
         self.image_processor = ImageProcessor()
         self.model_loader = ModelLoader(config_path)
+        self.advanced_deblurrer = AdvancedDeblurrer()
+        self.performance_optimizer = PerformanceOptimizer()
         
-    def deblur_image(self, input_path: str, output_path: str, method: str = 'cv2') -> bool:
+    def deblur_image(self, input_path: str, output_path: str, method: str = 'auto') -> bool:
         """
         Deblur an image using the specified method.
         
@@ -61,10 +64,15 @@ class ImageDeblurrer:
                 self.logger.error(f"Failed to load image: {input_path}")
                 return False
                 
+            # Automatic method selection if requested
+            if method == 'auto':
+                method = self.advanced_deblurrer.select_best_method(image)
+                self.logger.info(f"Auto-selected method: {method}")
+            
             self.logger.info(f"Processing image: {input_path} using method: {method}")
             
             # Apply deblurring based on method
-            if method == 'cv2':
+            if method == 'cv2' or method == 'cv2_advanced':
                 deblurred = self._deblur_cv2(image)
             elif method == 'wiener':
                 deblurred = self._deblur_wiener(image)
@@ -73,6 +81,11 @@ class ImageDeblurrer:
             else:
                 self.logger.error(f"Unknown deblurring method: {method}")
                 return False
+            
+            # Assess quality of deblurring
+            quality_metrics = self.advanced_deblurrer.assess_deblur_quality(image, deblurred)
+            self.logger.info(f"Deblurring quality score: {quality_metrics['quality_score']:.2f}")
+            self.logger.info(f"Sharpness improvement: {quality_metrics['sharpness_improvement']:.2f}x")
                 
             # Save result
             success = self.image_processor.save_image(deblurred, output_path)
@@ -86,6 +99,19 @@ class ImageDeblurrer:
             return False
     
     def _deblur_cv2(self, image: np.ndarray) -> np.ndarray:
+        """
+        Deblur using advanced CV2 techniques.
+        
+        Args:
+            image: Input image as numpy array
+            
+        Returns:
+            Deblurred image
+        """
+        # Use advanced CV2 deblurring
+        return self.advanced_deblurrer.deblur_cv2_advanced(image)
+    
+    def _deblur_cv2_basic(self, image: np.ndarray) -> np.ndarray:
         """
         Deblur using enhanced OpenCV techniques.
         
@@ -175,7 +201,7 @@ class ImageDeblurrer:
     
     def _deblur_wiener(self, image: np.ndarray) -> np.ndarray:
         """
-        Deblur using Wiener filtering.
+        Deblur using advanced Wiener filtering.
         
         Args:
             image: Input image as numpy array
@@ -183,42 +209,8 @@ class ImageDeblurrer:
         Returns:
             Deblurred image
         """
-        try:
-            from scipy import signal
-            from skimage import restoration, color, img_as_float, img_as_ubyte
-            
-            # Convert to float for processing
-            if image.dtype == np.uint8:
-                image_float = img_as_float(image)
-            else:
-                image_float = image.astype(np.float64)
-            
-            # Process each channel separately for color images
-            if len(image_float.shape) == 3 and image_float.shape[2] == 3:
-                # Process each RGB channel separately
-                psf = self._estimate_blur_kernel(color.rgb2gray(image_float))
-                deblurred = np.zeros_like(image_float)
-                
-                for i in range(3):
-                    deblurred[:, :, i] = restoration.wiener(
-                        image_float[:, :, i], psf, balance=0.1, clip=True
-                    )
-            else:
-                # Grayscale image
-                psf = self._estimate_blur_kernel(image_float)
-                deblurred = restoration.wiener(image_float, psf, balance=0.1)
-            
-            # Convert back to uint8
-            deblurred = np.clip(deblurred, 0, 1)
-            result = img_as_ubyte(deblurred)
-            
-            self.logger.info("Wiener filtering completed successfully")
-            return result
-            
-        except Exception as e:
-            self.logger.error(f"Wiener filtering failed: {str(e)}")
-            self.logger.warning("Falling back to enhanced CV2 method")
-            return self._deblur_cv2(image)
+        # Use advanced Wiener deblurring
+        return self.advanced_deblurrer.deblur_wiener_advanced(image)
     
     def _deblur_deep_learning(self, image: np.ndarray) -> np.ndarray:
         """
@@ -237,6 +229,13 @@ class ImageDeblurrer:
                 # If no pre-trained model, use enhanced traditional methods
                 self.logger.info("No deep learning model available, using hybrid approach")
                 return self._hybrid_deblur(image)
+            
+            # Check if memory optimization is needed
+            if not self.performance_optimizer.optimize_memory_usage(image):
+                self.logger.warning("Large image detected, using tiled processing")
+            
+            # Use advanced deep learning deblurring with tiling
+            return self.advanced_deblurrer.deblur_deep_learning_advanced(image, model)
             
             # Store original dimensions
             original_shape = image.shape

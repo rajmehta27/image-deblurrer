@@ -1,0 +1,198 @@
+# Advanced Image Deblurrer Configuration
+# This configuration file contains settings for the enhanced deblurring system
+
+# Advanced deblurring settings
+advanced:
+  # Automatic method selection
+  auto_select: true
+  
+  # Quality thresholds for auto-selection
+  quality_thresholds:
+    severe_blur: 0.7     # Above this, use deep learning
+    motion_blur: 0.5     # Motion blur detection threshold
+    high_noise: 10       # Noise level threshold
+  
+  # Multi-scale processing
+  multiscale:
+    enabled: true
+    pyramid_levels: auto  # or specify number (2-5)
+    blending_alpha: 0.6
+  
+  # Motion blur handling
+  motion_detection:
+    enabled: true
+    angle_estimation: true
+    kernel_optimization: true
+
+# CV2 method configuration
+cv2_advanced:
+  # Adaptive kernel sizing
+  adaptive_kernel:
+    enabled: true
+    min_size: 3
+    max_size: 15
+    
+  # Sharpening parameters
+  sharpening:
+    adaptive_strength: true
+    base_strength: 0.5
+    max_strength: 2.0
+    
+  # Edge preservation
+  edge_preservation:
+    enabled: true
+    guided_filter: true
+    bilateral_filter: true
+    
+  # Detail enhancement
+  detail_enhancement:
+    enabled: true
+    enhancement_factor: 0.5
+    blend_ratio: 0.85
+
+# Wiener filter configuration
+wiener_advanced:
+  # PSF estimation
+  psf_estimation:
+    method: cepstral  # Options: cepstral, blind, auto
+    size_estimation: auto
+    min_psf_size: 3
+    max_psf_size: 31
+    
+  # Blind deconvolution
+  blind_deconvolution:
+    enabled: true
+    iterations: 10
+    
+  # Noise handling
+  noise:
+    estimation: auto
+    default_level: 0.01
+    
+  # Artifact reduction
+  artifact_reduction:
+    enabled: true
+    median_filter: true
+    soft_thresholding: true
+
+# Deep learning configuration
+deep_learning_advanced:
+  # Tiling for large images
+  tiling:
+    enabled: true
+    tile_size: auto  # or specify size (128, 256, 512)
+    overlap: 32
+    blending: linear
+    
+  # Memory optimization
+  memory_optimization:
+    enabled: true
+    max_gpu_memory: 0.8  # Use 80% of available GPU memory
+    batch_processing: true
+    
+  # Pre/post processing
+  preprocessing:
+    clahe: true
+    normalize: true
+    
+  postprocessing:
+    guided_filter: true
+    sharpening: true
+    blend_with_original: 0.9
+
+# Performance optimization
+performance:
+  # GPU acceleration
+  gpu:
+    enabled: true
+    device: auto  # or specify device ID
+    mixed_precision: false
+    
+  # Parallel processing
+  parallel:
+    enabled: true
+    num_workers: auto  # or specify number
+    tile_parallel: true
+    
+  # Memory management
+  memory:
+    optimize_large_images: true
+    max_image_size_gb: 2.0
+    clear_cache: true
+    
+  # Caching
+  cache:
+    enabled: true
+    cache_size_mb: 500
+    cache_processed_tiles: true
+
+# Quality assessment
+quality_assessment:
+  # Metrics to compute
+  metrics:
+    sharpness: true
+    noise_level: true
+    ringing_artifacts: true
+    ssim: true
+    
+  # Quality thresholds
+  thresholds:
+    min_quality_score: 0.3
+    min_sharpness_improvement: 1.2
+    max_noise_level: 50
+    max_ringing: 0.5
+    
+  # Auto-retry with different methods
+  auto_retry:
+    enabled: true
+    max_attempts: 3
+    fallback_methods: ['cv2_advanced', 'wiener', 'deep_learning']
+
+# Batch processing
+batch:
+  # Batch optimization
+  optimization:
+    group_similar: true  # Group similar images for better performance
+    adaptive_batch_size: true
+    
+  # Progress tracking
+  progress:
+    show_eta: true
+    save_intermediate: false
+    
+  # Error handling
+  error_handling:
+    continue_on_error: true
+    save_error_log: true
+    retry_failed: true
+
+# Logging and debugging
+logging:
+  # Detailed logging
+  verbose: false
+  log_performance_metrics: true
+  log_quality_scores: true
+  
+  # Debug options
+  debug:
+    save_intermediate_results: false
+    save_psf_estimates: false
+    save_quality_maps: false
+    
+# Output configuration
+output:
+  # Format settings
+  format: auto  # auto, jpg, png, tiff
+  
+  # Quality settings
+  jpeg_quality: 95
+  png_compression: 6
+  
+  # Metadata
+  preserve_exif: true
+  add_processing_info: true
+  
+  # File naming
+  suffix: "_deblurred_advanced"
+  include_method: true  # Add method name to filename
+  include_quality_score: false  # Add quality score to filename

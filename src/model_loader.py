@@ -83,9 +83,10 @@ class ModelLoader:
         model_type = model_config.get('type', 'pytorch')
         model_path = model_config.get('path')
         
+        # Try to load pre-trained model if no path specified
         if not model_path or not os.path.exists(model_path):
-            self.logger.warning(f"Model path not found: {model_path}")
-            return None
+            self.logger.info("No model path found, attempting to load pre-trained model")
+            return self._load_pretrained_model(model_type, model_config)
         
         try:
             if model_type == 'pytorch' and PYTORCH_AVAILABLE:
@@ -254,6 +255,50 @@ class ModelLoader:
                 return torch.sigmoid(self.final(d1))
         
         return SimpleUNet(input_channels, output_channels)
+    
+    def _load_pretrained_model(self, model_type: str, config: Dict[str, Any]) -> Optional[Any]:
+        """
+        Load a pre-trained model.
+        
+        Args:
+            model_type: Type of model framework
+            config: Model configuration
+            
+        Returns:
+            Pre-trained model or None
+        """
+        try:
+            from pretrained_models import PretrainedModelProvider, SimplifiedDeblurModel
+            
+            if model_type == 'pytorch' and PYTORCH_AVAILABLE:
+                provider = PretrainedModelProvider()
+                model = provider.get_pretrained_model('lightweight', 'pytorch')
+                if model:
+                    self.model = model
+                    self.model_type = 'pytorch'
+                    self.logger.info("Loaded pre-trained PyTorch model")
+                    return model
+            
+            # Fallback to simplified model
+            simplified_path = 'models/pretrained/simplified_deblur.pkl'
+            if os.path.exists(simplified_path):
+                simplified = SimplifiedDeblurModel()
+                simplified.load(simplified_path)
+                self.model = simplified
+                self.model_type = 'simplified'
+                self.logger.info("Loaded simplified deblur model")
+                return simplified
+            else:
+                # Create new simplified model
+                simplified = SimplifiedDeblurModel()
+                self.model = simplified
+                self.model_type = 'simplified'
+                self.logger.info("Created new simplified deblur model")
+                return simplified
+                
+        except Exception as e:
+            self.logger.error(f"Failed to load pre-trained model: {e}")
+            return None
     
     def predict(self, input_image):
         """
